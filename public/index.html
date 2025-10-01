@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tienda de Videojuegos - JWT </title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; }
+        .container { background: #f5f5f5; padding: 20px; border-radius: 8px; }
+        .form-group { margin-bottom: 15px; }
+        input { padding: 10px; width: 100%; box-sizing: border-box; }
+        button { padding: 10px 15px; background: #007bff; color: white; border: none; cursor: pointer; }
+        .hidden { display: none; }
+        .profile-info { margin-top: 20px; background: white; padding: 15px; border-radius: 5px; }
+    </style>
+    <!-- Google Identity Services -->
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+</head>
+<body>
+    <div class="container">
+        <h1>Tienda de Videojuegos</h1>
+        
+        <!-- Sección de Login -->
+        <div id="loginSection">
+            <h2>Iniciar Sesión</h2>
+            <div class="form-group">
+                <label>Usuario:</label>
+                <input type="text" id="username" placeholder="admin">
+            </div>
+            <div class="form-group">
+                <label>Contraseña:</label>
+                <input type="password" id="password" placeholder="admin123">
+            </div>
+            <button id="btnLogin">Iniciar Sesión</button>
+            <div id="loginMessage" style="color:red; margin-top:10px;"></div>
+            <div style="margin-top:20px; text-align:center;">
+                <!-- Botón de Google -->
+                <div id="g_id_onload"
+                    data-client_id="625157329918-fu8qilqao7et3psb98oqcj31go2k1es6.apps.googleusercontent.com"
+                    data-callback="handleCredentialResponse">
+                </div>
+                <div class="g_id_signin" data-type="standard"></div>
+            </div>
+        </div>
+        
+        <!-- Sección Protegida (visible después de login) -->
+        <div id="protectedSection" class="hidden">
+            <h2>Perfil del Jugador</h2>
+            <button id="btnLoadPerfil">Cargar Perfil</button>
+            <div id="perfilData" class="profile-info"></div>
+        </div>
+    </div>
+
+    <script>
+        // Elementos del DOM
+        const loginSection = document.getElementById('loginSection');
+        const protectedSection = document.getElementById('protectedSection');
+        const btnLogin = document.getElementById('btnLogin');
+        const btnLoadPerfil = document.getElementById('btnLoadPerfil');
+        const loginMessage = document.getElementById('loginMessage');
+        const perfilData = document.getElementById('perfilData');
+
+        // 1. Iniciar sesión y guardar token
+        btnLogin.addEventListener('click', async () => {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            
+            try {
+                // Usar la URL absoluta para el backend en localhost:5500
+                const response = await fetch('http://localhost:5500/api/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    // Guardar token en localStorage
+                    localStorage.setItem('jwtToken', data.token);
+                    
+                    // Redirigir a la página de tienda
+                    window.location.href = '/tienda.html';
+                } else {
+                    loginMessage.textContent = data.error || 'Error en credenciales';
+                }
+            } catch (error) {
+                loginMessage.textContent = 'Error de conexión';
+            }
+        });
+
+        // 2. Cargar perfil con token
+        btnLoadPerfil && btnLoadPerfil.addEventListener('click', async () => {
+            const token = localStorage.getItem('jwtToken');
+            
+            if (!token) {
+                alert('No hay token. Inicia sesión primero.');
+                return;
+            }
+            
+            try {
+                // Usar la URL absoluta para el backend en localhost:5500
+                const response = await fetch('http://localhost:5500/api/perfil', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    // Mostrar datos del perfil
+                    perfilData.innerHTML = `
+                        <h3>Bienvenido ${data.perfil.username}!</h3>
+                        <p><strong>Rol:</strong> ${data.perfil.role}</p>
+                        <p><strong>Saldo:</strong> $${data.perfil.saldo}</p>
+                        <p><strong>Juegos favoritos:</strong> ${data.perfil.juegosFavoritos.join(', ')}</p>
+                        <h4>Últimas compras:</h4>
+                        <ul>
+                            ${data.perfil.ultimasCompras.map(compra => 
+                                `<li>${compra.juego} - $${compra.precio}</li>`
+                            ).join('')}
+                        </ul>
+                    `;
+                } else {
+                    perfilData.innerHTML = `<p style="color:red;">${data.error}</p>`;
+                }
+            } catch (error) {
+                perfilData.innerHTML = '<p style="color:red;">Error al cargar perfil</p>';
+            }
+        });
+
+        // 3. Login con Google (callback global)
+        async function handleCredentialResponse(response) {
+            // response.credential = ID Token de Google
+            const res = await fetch("http://localhost:5500/api/google-login", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ credential: response.credential })
+            });
+
+            const data = await res.json();
+            console.log("Respuesta del backend:", data);
+            
+            if (res.ok && data.token) {
+                // Guardar token y redirigir a la tienda
+                localStorage.setItem('jwtToken', data.token);
+                window.location.href = '/tienda.html';
+            }
+        }
+        window.handleCredentialResponse = handleCredentialResponse;
+    </script>
+</body>
+</html>

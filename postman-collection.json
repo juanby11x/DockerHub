@@ -1,0 +1,133 @@
+{
+  "info": {
+    "name": "JWT-Token GameStore API",
+    "description": "Colección para probar la API de autenticación JWT y OAuth",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:5500",
+      "type": "string"
+    },
+    {
+      "key": "jwtToken",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Health Check",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/health",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "health"]
+        }
+      }
+    },
+    {
+      "name": "Login Normal",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"username\": \"admin\",\n  \"password\": \"admin123\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/login",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "login"]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "if (pm.response.code === 200) {",
+              "    const response = pm.response.json();",
+              "    if (response.token) {",
+              "        pm.collectionVariables.set('jwtToken', response.token);",
+              "        console.log('Token JWT guardado:', response.token);",
+              "    }",
+              "}"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Login Google OAuth",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"credential\": \"tu_google_id_token_aqui\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/google-login",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "google-login"]
+        }
+      }
+    },
+    {
+      "name": "Obtener Carrito (Protegido)",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{jwtToken}}"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/carrito",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "carrito"]
+        }
+      }
+    },
+    {
+      "name": "Agregar al Carrito (Protegido)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{jwtToken}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"productId\": \"game-001\",\n  \"name\": \"Cyberpunk 2077\",\n  \"price\": 59.99,\n  \"quantity\": 1\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/carrito/add",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "carrito", "add"]
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,21 @@
+services:
+  # Servicio principal de la aplicación web
+  web-app:
+    build: .
+    ports:
+      - "5500:5500"
+    environment:
+      - NODE_ENV=production
+      - PORT=5500
+      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
+      - JWT_SECRET=${JWT_SECRET}
+      - JWT_EXPIRES_IN=${JWT_EXPIRES_IN}
+    volumes:
+      - ./logs:/app/logs
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5500/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s

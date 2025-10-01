@@ -1,0 +1,1170 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GameStore - Tienda de Videojuegos</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        .header {
+            background: rgba(0, 0, 0, 0.9);
+            color: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            backdrop-filter: blur(10px);
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #00ff88;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #00ff88;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: #000;
+        }
+
+        .logout-btn {
+            background: #ff4757;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .logout-btn:hover {
+            background: #ff3742;
+        }
+
+        .home-btn {
+            background: #00ff88;
+            color: #000;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s;
+            margin-right: 1rem;
+        }
+
+        .home-btn:hover {
+            background: #00e676;
+        }
+
+        .main-container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+
+        .welcome-section {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            text-align: center;
+            color: white;
+        }
+
+        .welcome-section h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 1rem;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #00ff88;
+        }
+
+        .filters-section {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .filter-input {
+            padding: 0.8rem;
+            border: none;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.9);
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .filter-select {
+            padding: 0.8rem;
+            border: none;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.9);
+            min-width: 150px;
+        }
+
+        .games-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .game-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .game-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+        }
+
+        .game-image {
+            width: 100%;
+            height: 200px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 3rem;
+        }
+
+        .game-info {
+            padding: 1.5rem;
+        }
+
+        .game-title {
+            font-size: 1.3rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+            color: #333;
+        }
+
+        .game-description {
+            color: #666;
+            margin-bottom: 1rem;
+            line-height: 1.5;
+        }
+
+        .game-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .game-price {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #00ff88;
+        }
+
+        .game-rating {
+            color: #ffa502;
+            font-weight: bold;
+        }
+
+        .add-to-cart-btn {
+            width: 100%;
+            padding: 0.8rem;
+            background: #00ff88;
+            color: #000;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .add-to-cart-btn:hover {
+            background: #00e676;
+        }
+
+        .cart-section {
+            position: fixed;
+            right: 1.5rem;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(0, 0, 0, 0.9);
+            color: white;
+            padding: 1.2rem;
+            border-radius: 15px;
+            min-width: 280px;
+            max-width: 320px;
+            backdrop-filter: blur(10px);
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        /* Scrollbar personalizado para el carrito */
+        .cart-section::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .cart-section::-webkit-scrollbar-track {
+            background: rgba(255,255,255,0.1);
+            border-radius: 3px;
+        }
+
+        .cart-section::-webkit-scrollbar-thumb {
+            background: rgba(0,255,136,0.5);
+            border-radius: 3px;
+        }
+
+        .cart-section::-webkit-scrollbar-thumb:hover {
+            background: rgba(0,255,136,0.7);
+        }
+
+        .cart-title {
+            font-size: 1.1rem;
+            margin-bottom: 0.8rem;
+            color: #00ff88;
+            text-align: center;
+        }
+
+        .cart-info {
+            background: rgba(0,255,136,0.1);
+            border: 1px solid rgba(0,255,136,0.3);
+            border-radius: 8px;
+            padding: 0.5rem;
+            margin-bottom: 0.8rem;
+            text-align: center;
+        }
+
+        .cart-info p {
+            margin: 0;
+            color: #00ff88;
+            font-size: 0.85rem;
+            font-style: italic;
+        }
+
+        .cart-items {
+            margin-bottom: 1rem;
+        }
+
+        .cart-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .cart-total {
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin: 1rem 0;
+            text-align: center;
+            color: #00ff88;
+        }
+
+        .checkout-btn {
+            width: 100%;
+            padding: 0.8rem;
+            background: #00ff88;
+            color: #000;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .checkout-btn:hover {
+            background: #00e676;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .cart-section {
+                position: static;
+                transform: none;
+                margin-top: 2rem;
+                max-width: 100%;
+                right: auto;
+            }
+
+        .cart-actions {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .clear-cart-btn {
+            background: #ff6b6b;
+            color: white;
+            border: none;
+            padding: 0.6rem 1rem;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: bold;
+            font-size: 0.85rem;
+        }
+
+        .clear-cart-btn:hover {
+            background: #ff5252;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 6px rgba(255, 107, 107, 0.3);
+        }
+
+        .checkout-btn {
+            background: #00ff88;
+            color: #000;
+            border: none;
+            padding: 0.6rem 1rem;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 0.85rem;
+        }
+
+        .checkout-btn:hover {
+            background: #00e676;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 6px rgba(0,255,136,0.3);
+        }
+
+        .cart-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.8rem;
+            border-bottom: 1px solid rgba(255,255,255,0.2);
+            margin-bottom: 0.6rem;
+            background: rgba(255,255,255,0.08);
+            border-radius: 8px;
+            border: 1px solid rgba(255,255,255,0.1);
+            transition: all 0.3s ease;
+        }
+
+        .cart-item:hover {
+            background: rgba(255,255,255,0.12);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+
+        .cart-item-info {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            flex: 1;
+        }
+
+        .cart-item-title {
+            font-weight: bold;
+            font-size: 1.1rem;
+            color: #00ff88;
+        }
+
+        .cart-item-details {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+
+        .cart-item-price {
+            color: #ccc;
+            font-size: 0.9rem;
+        }
+
+        .cart-item-subtotal {
+            color: #00ff88;
+            font-size: 0.85rem;
+            font-weight: bold;
+        }
+
+        .cart-item-controls {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .quantity-controls {
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+            background: rgba(0,255,136,0.1);
+            padding: 0.4rem;
+            border-radius: 8px;
+            border: 1px solid rgba(0,255,136,0.2);
+        }
+
+        .quantity-btn {
+            background: #00ff88;
+            color: #000;
+            border: none;
+            width: 26px;
+            height: 26px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 1rem;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+        }
+
+        .quantity-btn:hover:not(:disabled) {
+            background: #00e676;
+            transform: scale(1.1);
+            box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+        }
+
+        .quantity-btn:disabled {
+            background: #666;
+            cursor: not-allowed;
+            opacity: 0.5;
+            transform: scale(0.95);
+        }
+
+        .quantity-display {
+            min-width: 30px;
+            text-align: center;
+            font-weight: bold;
+            color: #00ff88;
+            font-size: 1rem;
+            background: rgba(255,255,255,0.1);
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .remove-btn {
+            background: #ff4757;
+            color: white;
+            border: none;
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 4px rgba(255,71,87,0.3);
+        }
+
+        .remove-btn:hover {
+            background: #ff3742;
+            transform: scale(1.15);
+            box-shadow: 0 4px 8px rgba(255,71,87,0.4);
+        }
+
+        .cart-empty {
+            text-align: center;
+            color: #ccc;
+            font-style: italic;
+            padding: 2.5rem;
+            font-size: 1.2rem;
+            background: rgba(255,255,255,0.05);
+            border-radius: 12px;
+            border: 2px dashed rgba(255,255,255,0.2);
+            transition: all 0.3s ease;
+        }
+
+        .cart-empty:hover {
+            background: rgba(255,255,255,0.08);
+            border-color: rgba(255,255,255,0.3);
+        }
+
+        .cart-empty::before {
+            content: "🛒";
+            font-size: 4rem;
+            display: block;
+            margin-bottom: 1rem;
+            opacity: 0.6;
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {
+                transform: translateY(0);
+            }
+            40% {
+                transform: translateY(-10px);
+            }
+            60% {
+                transform: translateY(-5px);
+            }
+        }
+
+        .cart-total {
+            font-size: 1.1rem;
+            font-weight: bold;
+            margin: 1rem 0;
+            text-align: center;
+            color: #00ff88;
+            background: rgba(0,255,136,0.1);
+            padding: 0.8rem;
+            border-radius: 8px;
+            border: 2px solid rgba(0,255,136,0.3);
+            }
+            
+            .filters-section {
+                flex-direction: column;
+            }
+            
+            .filter-input, .filter-select {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="logo">🎮 GameStore</div>
+        <div class="user-info">
+            <button class="home-btn" id="homeBtn">🏠 Inicio</button>
+            <div class="user-avatar" id="userAvatar">U</div>
+            <div>
+                <div id="userName">Usuario</div>
+                <div style="font-size: 0.8rem; color: #ccc;">Saldo: $<span id="userBalance">0</span></div>
+            </div>
+            <button class="logout-btn" id="logoutBtn">Cerrar Sesión</button>
+        </div>
+    </header>
+
+    <!-- Contenido Principal -->
+    <div class="main-container">
+        <!-- Sección de Bienvenida -->
+        <div class="welcome-section">
+            <h1>¡Bienvenido a GameStore!</h1>
+            <p>Descubre los mejores videojuegos al mejor precio</p>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-number" id="totalGames">0</div>
+                    <div>Juegos Disponibles</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="cartItems">0</div>
+                    <div>En el Carrito</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="userGames">0</div>
+                    <div>Mis Juegos</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filtros -->
+        <div class="filters-section">
+            <input type="text" class="filter-input" id="searchInput" placeholder="Buscar juegos...">
+            <select class="filter-select" id="genreFilter">
+                <option value="">Todos los géneros</option>
+                <option value="accion">Acción</option>
+                <option value="aventura">Aventura</option>
+                <option value="rpg">RPG</option>
+                <option value="estrategia">Estrategia</option>
+                <option value="deportes">Deportes</option>
+                <option value="simulacion">Simulación</option>
+            </select>
+            <select class="filter-select" id="priceFilter">
+                <option value="">Todos los precios</option>
+                <option value="0-20">$0 - $20</option>
+                <option value="20-50">$20 - $50</option>
+                <option value="50-100">$50 - $100</option>
+                <option value="100+">$100+</option>
+            </select>
+        </div>
+
+        <!-- Grid de Juegos -->
+        <div class="games-grid" id="gamesGrid">
+            <!-- Los juegos se cargarán dinámicamente aquí -->
+        </div>
+    </div>
+
+    <!-- Carrito de Compras -->
+    <div class="cart-section">
+        <h3 class="cart-title">🛒 Carrito de Compras</h3>
+        <div class="cart-info">
+            <p>💡 <strong>Controles:</strong> <strong>+</strong> <strong>-</strong> para cantidades, <strong>🗑️</strong> para eliminar</p>
+        </div>
+        <div class="cart-items" id="cartItems">
+            <!-- Los items del carrito se mostrarán aquí -->
+        </div>
+        <div class="cart-total">Total: $<span id="cartTotal">0</span></div>
+        <div class="cart-actions">
+            <button class="clear-cart-btn" onclick="clearCart()">🗑️ Vaciar Carrito</button>
+            <button class="checkout-btn" id="checkoutBtn">💳 Finalizar Compra</button>
+        </div>
+    </div>
+
+    <script>
+        // Estado global de la aplicación
+        let currentUser = null;
+        let games = [];
+        let filteredGames = [];
+        const API_BASE_URL = 'http://localhost:5500/api';
+
+        // Elementos del DOM
+        const gamesGrid = document.getElementById('gamesGrid');
+        const cartItems = document.getElementById('cartItems');
+        const cartTotal = document.getElementById('cartTotal');
+        const searchInput = document.getElementById('searchInput');
+        const genreFilter = document.getElementById('genreFilter');
+        const priceFilter = document.getElementById('priceFilter');
+        const logoutBtn = document.getElementById('logoutBtn');
+        const checkoutBtn = document.getElementById('checkoutBtn');
+        const homeBtn = document.getElementById('homeBtn');
+
+        // Verificar autenticación al cargar la página
+        document.addEventListener('DOMContentLoaded', async () => {
+            const token = localStorage.getItem('jwtToken');
+            if (!token) {
+                window.location.href = '/index.html';
+                return;
+            }
+
+            try {
+                await loadUserProfile();
+                await loadGames();
+                await loadCart();
+                setupEventListeners();
+                updateStats();
+            } catch (error) {
+                console.error('Error al cargar la página:', error);
+                localStorage.removeItem('jwtToken');
+                window.location.href = '/index.html';
+            }
+        });
+
+        // Cargar perfil del usuario
+        async function loadUserProfile() {
+            const token = localStorage.getItem('jwtToken');
+            const response = await fetch(`${API_BASE_URL}/perfil`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                currentUser = data.perfil;
+                updateUserInfo();
+            } else {
+                throw new Error('Error al cargar perfil');
+            }
+        }
+
+        // Actualizar información del usuario en la UI
+        function updateUserInfo() {
+            document.getElementById('userName').textContent = currentUser.username;
+            document.getElementById('userBalance').textContent = currentUser.saldo;
+            document.getElementById('userAvatar').textContent = currentUser.username.charAt(0).toUpperCase();
+            document.getElementById('userGames').textContent = currentUser.juegosFavoritos.length;
+        }
+
+        // Cargar juegos desde el servidor
+        async function loadGames() {
+            try {
+                const token = localStorage.getItem('jwtToken');
+                const response = await fetch(`${API_BASE_URL}/juegos`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    games = data.juegos;
+                    filteredGames = [...games];
+                    renderGames();
+                } else {
+                    console.error('Error al cargar juegos:', data.error);
+                }
+            } catch (error) {
+                console.error('Error de conexión:', error);
+                // Fallback a datos simulados si el servidor no responde
+                loadFallbackGames();
+            }
+        }
+
+        // Cargar carrito desde el servidor
+        async function loadCart() {
+            try {
+                const token = localStorage.getItem('jwtToken');
+                const response = await fetch(`${API_BASE_URL}/carrito`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    updateCartUI(data.cart, data.total);
+                } else {
+                    console.error('Error al cargar carrito:', data.error);
+                }
+            } catch (error) {
+                console.error('Error de conexión al cargar carrito:', error);
+            }
+        }
+
+        // Cargar juegos de respaldo si el servidor falla
+        function loadFallbackGames() {
+            games = [
+                {
+                    id: 1,
+                    title: "Cyberpunk 2077",
+                    description: "Un RPG de acción y aventura en un mundo futurista distópico.",
+                    price: 59.99,
+                    genre: "rpg",
+                    rating: 4.2,
+                    image: "🎮"
+                },
+                {
+                    id: 2,
+                    title: "FIFA 24",
+                    description: "El simulador de fútbol más realista del mercado.",
+                    price: 69.99,
+                    genre: "deportes",
+                    rating: 4.5,
+                    image: "⚽"
+                },
+                {
+                    id: 3,
+                    title: "Call of Duty: Warzone",
+                    description: "Battle royale gratuito con gráficos espectaculares.",
+                    price: 0,
+                    genre: "accion",
+                    rating: 4.3,
+                    image: "🔫"
+                },
+                {
+                    id: 4,
+                    title: "The Witcher 3",
+                    description: "Una épica aventura de fantasía con decisiones que importan.",
+                    price: 39.99,
+                    genre: "rpg",
+                    rating: 4.8,
+                    image: "⚔️"
+                },
+                {
+                    id: 5,
+                    title: "Minecraft",
+                    description: "Construye, explora y sobrevive en un mundo de bloques.",
+                    price: 26.95,
+                    genre: "aventura",
+                    rating: 4.6,
+                    image: "⛏️"
+                },
+                {
+                    id: 6,
+                    title: "Civilization VI",
+                    description: "Construye tu imperio y domina el mundo.",
+                    price: 59.99,
+                    genre: "estrategia",
+                    rating: 4.4,
+                    image: "🏛️"
+                }
+            ];
+            filteredGames = [...games];
+            renderGames();
+        }
+
+        // Renderizar juegos en la UI
+        function renderGames() {
+            gamesGrid.innerHTML = filteredGames.map(game => `
+                <div class="game-card">
+                    <div class="game-image">${game.image}</div>
+                    <div class="game-info">
+                        <h3 class="game-title">${game.title}</h3>
+                        <p class="game-description">${game.description}</p>
+                        <div class="game-meta">
+                            <span class="game-price">$${game.price === 0 ? 'Gratis' : game.price}</span>
+                            <span class="game-rating">⭐ ${game.rating}</span>
+                        </div>
+                        <button class="add-to-cart-btn" onclick="addToCart(${game.id})">
+                            ${game.price === 0 ? 'Obtener Gratis' : 'Agregar al Carrito'}
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Agregar juego al carrito
+        async function addToCart(gameId) {
+            const game = games.find(g => g.id === gameId);
+            if (!game) return;
+
+            try {
+                const token = localStorage.getItem('jwtToken');
+                const response = await fetch(`${API_BASE_URL}/carrito/add`, {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}` 
+                    },
+                    body: JSON.stringify({
+                        id: game.id,
+                        title: game.title,
+                        price: game.price,
+                        quantity: 1
+                    })
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    updateCartUI(data.cart, data.total);
+            updateStats();
+                    alert(`✅ ${game.title} agregado al carrito\n\n💰 Precio: $${game.price === 0 ? 'Gratis' : game.price}\n🛒 Cantidad: 1\n\nPuedes ajustar la cantidad usando los botones + y - en el carrito`);
+                } else {
+                    const errorData = await response.json();
+                    alert(`❌ Error: ${errorData.error}`);
+                }
+            } catch (error) {
+                console.error('Error al agregar al carrito:', error);
+                alert('Error de conexión al agregar al carrito');
+            }
+        }
+
+        // Actualizar carrito en la UI
+        function updateCartUI(cart, total) {
+            if (cart.length === 0) {
+                cartItems.innerHTML = '<div class="cart-empty">🛒 Tu carrito está vacío</div>';
+                cartTotal.textContent = '0.00';
+                return;
+            }
+
+            cartItems.innerHTML = cart.map(item => `
+                <div class="cart-item">
+                    <div class="cart-item-info">
+                        <span class="cart-item-title">${item.title}</span>
+                        <div class="cart-item-details">
+                            <span class="cart-item-price">$${item.price === 0 ? 'Gratis' : item.price}</span>
+                            <span class="cart-item-subtotal">$${(item.price * item.quantity).toFixed(2)}</span>
+                        </div>
+                    </div>
+                    <div class="cart-item-controls">
+                        <div class="quantity-controls">
+                            <button onclick="updateQuantity(${item.id}, ${item.quantity - 1})" class="quantity-btn" ${item.quantity <= 1 ? 'disabled' : ''} title="Reducir cantidad">−</button>
+                            <span class="quantity-display">${item.quantity}</span>
+                            <button onclick="updateQuantity(${item.id}, ${item.quantity + 1})" class="quantity-btn" title="Aumentar cantidad">+</button>
+                        </div>
+                        <button onclick="removeFromCart(${item.id})" class="remove-btn" title="Eliminar ${item.title}">🗑️</button>
+                    </div>
+                </div>
+            `).join('');
+
+            cartTotal.textContent = total.toFixed(2);
+        }
+
+        // Actualizar estadísticas
+        async function updateStats() {
+            document.getElementById('totalGames').textContent = games.length;
+            
+            try {
+                const token = localStorage.getItem('jwtToken');
+                const response = await fetch(`${API_BASE_URL}/carrito`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    document.getElementById('cartItems').textContent = data.itemCount;
+                }
+            } catch (error) {
+                console.error('Error al actualizar estadísticas:', error);
+            }
+        }
+
+        // Actualizar cantidad de un producto en el carrito
+        async function updateQuantity(productId, newQuantity) {
+            // Validar que la cantidad no sea negativa
+            if (newQuantity < 0) {
+                return;
+            }
+
+            try {
+                const token = localStorage.getItem('jwtToken');
+                const response = await fetch(`${API_BASE_URL}/carrito/update/${productId}`, {
+                    method: 'PUT',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}` 
+                    },
+                    body: JSON.stringify({ quantity: newQuantity })
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    updateCartUI(data.cart, data.total);
+                    updateStats();
+                    
+                    // Mostrar mensaje de confirmación
+                    if (newQuantity === 0) {
+                        // El producto se eliminó automáticamente
+                        alert('✅ Producto eliminado del carrito (cantidad llegó a 0)');
+                    } else {
+                        // Mostrar confirmación sutil
+                        const product = data.cart.find(item => item.id === productId);
+                        if (product) {
+                            console.log(`✅ Cantidad de "${product.title}" actualizada a ${newQuantity}`);
+                        }
+                    }
+                } else {
+                    const errorData = await response.json();
+                    alert(`❌ Error: ${errorData.error}`);
+                }
+            } catch (error) {
+                console.error('Error al actualizar cantidad:', error);
+                alert('❌ Error de conexión al actualizar cantidad');
+            }
+        }
+
+        // Eliminar producto del carrito
+        async function removeFromCart(productId) {
+            try {
+                const token = localStorage.getItem('jwtToken');
+                
+                // Obtener información del producto antes de eliminarlo
+                const cartResponse = await fetch(`${API_BASE_URL}/carrito`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                
+                if (cartResponse.ok) {
+                    const cartData = await cartResponse.json();
+                    const product = cartData.cart.find(item => item.id === productId);
+                    
+                    if (product) {
+                        const confirmMessage = `¿Estás seguro de que quieres eliminar "${product.title}" del carrito?\n\n📊 Detalles del producto:\n• Cantidad: ${product.quantity}\n• Precio unitario: $${product.price === 0 ? 'Gratis' : product.price}\n• Subtotal: $${(product.price * product.quantity).toFixed(2)}`;
+                        
+                        if (!confirm(confirmMessage)) {
+                            return;
+                        }
+                    }
+                }
+
+                const response = await fetch(`${API_BASE_URL}/carrito/remove/${productId}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    updateCartUI(data.cart, data.total);
+                    updateStats();
+                    alert('✅ Producto eliminado del carrito exitosamente');
+                } else {
+                    const errorData = await response.json();
+                    alert(`❌ Error: ${errorData.error}`);
+                }
+            } catch (error) {
+                console.error('Error al eliminar del carrito:', error);
+                alert('❌ Error de conexión al eliminar del carrito');
+            }
+        }
+
+        // Vaciar carrito completo
+        async function clearCart() {
+            try {
+                const token = localStorage.getItem('jwtToken');
+                
+                // Obtener carrito actual para mostrar cuántos productos se van a eliminar
+                const cartResponse = await fetch(`${API_BASE_URL}/carrito`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                
+                if (cartResponse.ok) {
+                    const cartData = await cartResponse.json();
+                    
+                    if (cartData.cart.length === 0) {
+                        alert('El carrito ya está vacío');
+                        return;
+                    }
+                    
+                    const confirmMessage = `¿Estás seguro de que quieres vaciar el carrito?\n\n🗑️ Se eliminarán ${cartData.cart.length} producto(s)\n💰 Total a eliminar: $${cartData.total.toFixed(2)}\n\nEsta acción no se puede deshacer.`;
+                    
+                    if (!confirm(confirmMessage)) {
+                        return;
+                    }
+                }
+
+                const response = await fetch(`${API_BASE_URL}/carrito/clear`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    updateCartUI(data.cart, data.total);
+                    updateStats();
+                    alert('✅ Carrito vaciado exitosamente');
+                } else {
+                    const errorData = await response.json();
+                    alert(`❌ Error: ${errorData.error}`);
+                }
+            } catch (error) {
+                console.error('Error al vaciar carrito:', error);
+                alert('❌ Error de conexión al vaciar carrito');
+            }
+        }
+
+        // Configurar event listeners
+        function setupEventListeners() {
+            // Búsqueda y filtros
+            searchInput.addEventListener('input', filterGames);
+            genreFilter.addEventListener('change', filterGames);
+            priceFilter.addEventListener('change', filterGames);
+
+            // Botones
+            logoutBtn.addEventListener('click', logout);
+            checkoutBtn.addEventListener('click', checkout);
+            homeBtn.addEventListener('click', () => window.location.href = '/index.html');
+        }
+
+        // Filtrar juegos
+        function filterGames() {
+            const searchTerm = searchInput.value.toLowerCase();
+            const selectedGenre = genreFilter.value;
+            const selectedPrice = priceFilter.value;
+
+            filteredGames = games.filter(game => {
+                const matchesSearch = game.title.toLowerCase().includes(searchTerm) || 
+                                   game.description.toLowerCase().includes(searchTerm);
+                const matchesGenre = !selectedGenre || game.genre === selectedGenre;
+                const matchesPrice = !selectedPrice || checkPriceRange(game.price, selectedPrice);
+
+                return matchesSearch && matchesGenre && matchesPrice;
+            });
+
+            renderGames();
+        }
+
+        // Verificar rango de precios
+        function checkPriceRange(price, range) {
+            switch (range) {
+                case '0-20': return price >= 0 && price <= 20;
+                case '20-50': return price > 20 && price <= 50;
+                case '50-100': return price > 50 && price <= 100;
+                case '100+': return price > 100;
+                default: return true;
+            }
+        }
+
+        // Finalizar compra
+        async function checkout() {
+            try {
+                const token = localStorage.getItem('jwtToken');
+                
+                // Obtener carrito actual del servidor
+                const cartResponse = await fetch(`${API_BASE_URL}/carrito`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                
+                if (!cartResponse.ok) {
+                    throw new Error('Error al obtener carrito');
+                }
+                
+                const cartData = await cartResponse.json();
+                
+                if (cartData.cart.length === 0) {
+                alert('El carrito está vacío');
+                return;
+            }
+
+                if (cartData.total > currentUser.saldo) {
+                alert('Saldo insuficiente para realizar la compra');
+                return;
+            }
+
+                const response = await fetch(`${API_BASE_URL}/comprar`, {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ 
+                        juegos: cartData.cart,
+                        total: cartData.total 
+                    })
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    alert(`¡Compra realizada con éxito! ID de orden: ${data.orderId}`);
+                    
+                    // Vaciar carrito después de la compra
+                    await clearCart();
+                    
+                    // Actualizar saldo del usuario
+                    currentUser.saldo -= cartData.total;
+                    updateUserInfo();
+                } else {
+                    const errorData = await response.json();
+                    alert(`Error al procesar la compra: ${errorData.error}`);
+                }
+            } catch (error) {
+                console.error('Error en checkout:', error);
+                alert('Error de conexión al procesar la compra');
+            }
+        }
+
+        // Cerrar sesión
+        function logout() {
+            localStorage.removeItem('jwtToken');
+            window.location.href = '/index.html';
+        }
+    </script>
+</body>
+</html>

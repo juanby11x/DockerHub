@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Carrito - RA-Unidad III</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .test-section {
+            background: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .test-button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            margin: 5px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .test-button:hover {
+            background: #0056b3;
+        }
+        .test-button.success {
+            background: #28a745;
+        }
+        .test-button.danger {
+            background: #dc3545;
+        }
+        .result {
+            background: #f8f9fa;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+            border-left: 4px solid #007bff;
+        }
+        .result.success {
+            border-left-color: #28a745;
+        }
+        .result.error {
+            border-left-color: #dc3545;
+        }
+        .cart-display {
+            background: #e9ecef;
+            padding: 15px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+        .step {
+            background: #fff3cd;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+            border-left: 4px solid #ffc107;
+        }
+    </style>
+</head>
+<body>
+    <h1>🧪 Test de Carrito de Compras - RA-Unidad III</h1>
+    
+    <div class="step">
+        <h3>📋 Flujo de Carrito Requerido:</h3>
+        <ol>
+            <li>Realizar login y obtener token</li>
+            <li>Consultar carrito vacío (GET /api/carrito)</li>
+            <li>Agregar un producto (POST /api/carrito/add)</li>
+            <li>Consultar carrito con productos (GET /api/carrito)</li>
+            <li>Modificar cantidad (PUT /api/carrito/update/:id)</li>
+            <li>Eliminar producto (DELETE /api/carrito/remove/:id)</li>
+            <li>Vaciar carrito (DELETE /api/carrito/clear)</li>
+            <li>Confirmar carrito vacío</li>
+        </ol>
+    </div>
+
+    <div class="test-section">
+        <h3>🔐 Autenticación</h3>
+        <input type="text" id="username" placeholder="Usuario" value="admin">
+        <input type="password" id="password" placeholder="Contraseña" value="admin123">
+        <button class="test-button" onclick="login()">Login</button>
+        <div id="loginResult" class="result"></div>
+    </div>
+
+    <div class="test-section">
+        <h3>🛒 Endpoints del Carrito</h3>
+        
+        <h4>1. Obtener Carrito (GET /api/carrito)</h4>
+        <button class="test-button" onclick="getCart()">Obtener Carrito</button>
+        <div id="getCartResult" class="result"></div>
+
+        <h4>2. Agregar Producto (POST /api/carrito/add)</h4>
+        <button class="test-button" onclick="addToCart()">Agregar Cyberpunk 2077</button>
+        <button class="test-button" onclick="addToCart2()">Agregar FIFA 24</button>
+        <div id="addToCartResult" class="result"></div>
+
+        <h4>3. Actualizar Cantidad (PUT /api/carrito/update/:productId)</h4>
+        <button class="test-button" onclick="updateQuantity()">Actualizar Cantidad Cyberpunk a 3</button>
+        <div id="updateQuantityResult" class="result"></div>
+
+        <h4>4. Eliminar Producto (DELETE /api/carrito/remove/:productId)</h4>
+        <button class="test-button" onclick="removeFromCart()">Eliminar FIFA 24</button>
+        <div id="removeFromCartResult" class="result"></div>
+
+        <h4>5. Vaciar Carrito (DELETE /api/carrito/clear)</h4>
+        <button class="test-button danger" onclick="clearCart()">Vaciar Carrito</button>
+        <div id="clearCartResult" class="result"></div>
+    </div>
+
+    <div class="test-section">
+        <h3>📊 Estado del Carrito</h3>
+        <div id="cartDisplay" class="cart-display">Carrito vacío</div>
+        <button class="test-button" onclick="refreshCart()">Actualizar Vista</button>
+    </div>
+
+    <div class="test-section">
+        <h3>✅ Verificación Completa</h3>
+        <button class="test-button success" onclick="runCompleteTest()">Ejecutar Test Completo</button>
+        <div id="completeTestResult" class="result"></div>
+    </div>
+
+    <script>
+        const API_BASE_URL = 'http://localhost:5500/api';
+        let currentToken = null;
+
+        // Función para mostrar resultados
+        function showResult(elementId, message, isSuccess = true) {
+            const element = document.getElementById(elementId);
+            element.textContent = message;
+            element.className = `result ${isSuccess ? 'success' : 'error'}`;
+        }
+
+        // Función para mostrar el carrito
+        function displayCart(cart, total) {
+            const display = document.getElementById('cartDisplay');
+            if (cart.length === 0) {
+                display.innerHTML = '<strong>Carrito vacío</strong>';
+                return;
+            }
+            
+            let html = `<strong>Total: $${total.toFixed(2)}</strong><br>`;
+            cart.forEach(item => {
+                html += `• ${item.title} - $${item.price} x ${item.quantity}<br>`;
+            });
+            display.innerHTML = html;
+        }
+
+        // 1. Login
+        async function login() {
+            try {
+                const username = document.getElementById('username').value;
+                const password = document.getElementById('password').value;
+
+                const response = await fetch(`${API_BASE_URL}/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    currentToken = data.token;
+                    showResult('loginResult', `✅ Login exitoso. Token obtenido: ${data.token.substring(0, 20)}...`, true);
+                } else {
+                    const error = await response.json();
+                    showResult('loginResult', `❌ Error en login: ${error.error}`, false);
+                }
+            } catch (error) {
+                showResult('loginResult', `❌ Error de conexión: ${error.message}`, false);
+            }
+        }
+
+        // 2. Obtener carrito
+        async function getCart() {
+            if (!currentToken) {
+                showResult('getCartResult', '❌ Primero debes hacer login', false);
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/carrito`, {
+                    headers: { 'Authorization': `Bearer ${currentToken}` }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    displayCart(data.cart, data.total);
+                    showResult('getCartResult', `✅ Carrito obtenido. ${data.itemCount} productos, Total: $${data.total}`, true);
+                } else {
+                    const error = await response.json();
+                    showResult('getCartResult', `❌ Error: ${error.error}`, false);
+                }
+            } catch (error) {
+                showResult('getCartResult', `❌ Error de conexión: ${error.message}`, false);
+            }
+        }
+
+        // 3. Agregar al carrito
+        async function addToCart() {
+            if (!currentToken) {
+                showResult('addToCartResult', '❌ Primero debes hacer login', false);
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/carrito/add`, {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${currentToken}` 
+                    },
+                    body: JSON.stringify({
+                        id: 1,
+                        title: "Cyberpunk 2077",
+                        price: 59.99,
+                        quantity: 1
+                    })
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    displayCart(data.cart, data.total);
+                    showResult('addToCartResult', `✅ Producto agregado. ${data.message}`, true);
+                } else {
+                    const error = await response.json();
+                    showResult('addToCartResult', `❌ Error: ${error.error}`, false);
+                }
+            } catch (error) {
+                showResult('addToCartResult', `❌ Error de conexión: ${error.message}`, false);
+            }
+        }
+
+        async function addToCart2() {
+            if (!currentToken) {
+                showResult('addToCartResult', '❌ Primero debes hacer login', false);
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/carrito/add`, {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${currentToken}` 
+                    },
+                    body: JSON.stringify({
+                        id: 2,
+                        title: "FIFA 24",
+                        price: 69.99,
+                        quantity: 1
+                    })
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    displayCart(data.cart, data.total);
+                    showResult('addToCartResult', `✅ Producto agregado. ${data.message}`, true);
+                } else {
+                    const error = await response.json();
+                    showResult('addToCartResult', `❌ Error: ${error.error}`, false);
+                }
+            } catch (error) {
+                showResult('addToCartResult', `❌ Error de conexión: ${error.message}`, false);
+            }
+        }
+
+        // 4. Actualizar cantidad
+        async function updateQuantity() {
+            if (!currentToken) {
+                showResult('updateQuantityResult', '❌ Primero debes hacer login', false);
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/carrito/update/1`, {
+                    method: 'PUT',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${currentToken}` 
+                    },
+                    body: JSON.stringify({ quantity: 3 })
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    displayCart(data.cart, data.total);
+                    showResult('updateQuantityResult', `✅ Cantidad actualizada. ${data.message}`, true);
+                } else {
+                    const error = await response.json();
+                    showResult('updateQuantityResult', `❌ Error: ${error.error}`, false);
+                }
+            } catch (error) {
+                showResult('updateQuantityResult', `❌ Error de conexión: ${error.message}`, false);
+            }
+        }
+
+        // 5. Eliminar producto
+        async function removeFromCart() {
+            if (!currentToken) {
+                showResult('removeFromCartResult', '❌ Primero debes hacer login', false);
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/carrito/remove/2`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${currentToken}` }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    displayCart(data.cart, data.total);
+                    showResult('removeFromCartResult', `✅ Producto eliminado. ${data.message}`, true);
+                } else {
+                    const error = await response.json();
+                    showResult('removeFromCartResult', `❌ Error: ${error.error}`, false);
+                }
+            } catch (error) {
+                showResult('removeFromCartResult', `❌ Error de conexión: ${error.message}`, false);
+            }
+        }
+
+        // 6. Vaciar carrito
+        async function clearCart() {
+            if (!currentToken) {
+                showResult('clearCartResult', '❌ Primero debes hacer login', false);
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/carrito/clear`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${currentToken}` }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    displayCart(data.cart, data.total);
+                    showResult('clearCartResult', `✅ Carrito vaciado. ${data.message}`, true);
+                } else {
+                    const error = await response.json();
+                    showResult('clearCartResult', `❌ Error: ${error.error}`, false);
+                }
+            } catch (error) {
+                showResult('clearCartResult', `❌ Error de conexión: ${error.message}`, false);
+            }
+        }
+
+        // Actualizar vista del carrito
+        async function refreshCart() {
+            if (currentToken) {
+                await getCart();
+            }
+        }
+
+        // Test completo
+        async function runCompleteTest() {
+            if (!currentToken) {
+                showResult('completeTestResult', '❌ Primero debes hacer login', false);
+                return;
+            }
+
+            let results = [];
+            
+            try {
+                // 1. Obtener carrito vacío
+                let response = await fetch(`${API_BASE_URL}/carrito`, {
+                    headers: { 'Authorization': `Bearer ${currentToken}` }
+                });
+                if (response.ok) {
+                    const data = await response.json();
+                    results.push(`✅ Carrito vacío: ${data.itemCount} productos`);
+                }
+
+                // 2. Agregar producto
+                response = await fetch(`${API_BASE_URL}/carrito/add`, {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${currentToken}` 
+                    },
+                    body: JSON.stringify({
+                        id: 1,
+                        title: "Test Product",
+                        price: 29.99,
+                        quantity: 1
+                    })
+                });
+                if (response.ok) {
+                    results.push('✅ Producto agregado');
+                }
+
+                // 3. Verificar carrito con productos
+                response = await fetch(`${API_BASE_URL}/carrito`, {
+                    headers: { 'Authorization': `Bearer ${currentToken}` }
+                });
+                if (response.ok) {
+                    const data = await response.json();
+                    results.push(`✅ Carrito con productos: ${data.itemCount} productos`);
+                }
+
+                // 4. Actualizar cantidad
+                response = await fetch(`${API_BASE_URL}/carrito/update/1`, {
+                    method: 'PUT',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${currentToken}` 
+                    },
+                    body: JSON.stringify({ quantity: 2 })
+                });
+                if (response.ok) {
+                    results.push('✅ Cantidad actualizada');
+                }
+
+                // 5. Eliminar producto
+                response = await fetch(`${API_BASE_URL}/carrito/remove/1`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${currentToken}` }
+                });
+                if (response.ok) {
+                    results.push('✅ Producto eliminado');
+                }
+
+                // 6. Vaciar carrito
+                response = await fetch(`${API_BASE_URL}/carrito/clear`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${currentToken}` }
+                });
+                if (response.ok) {
+                    results.push('✅ Carrito vaciado');
+                }
+
+                // 7. Confirmar carrito vacío
+                response = await fetch(`${API_BASE_URL}/carrito`, {
+                    headers: { 'Authorization': `Bearer ${currentToken}` }
+                });
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.itemCount === 0) {
+                        results.push('✅ Carrito confirmado vacío');
+                    }
+                }
+
+                showResult('completeTestResult', `🎉 Test completo exitoso!\n${results.join('\n')}`, true);
+                await refreshCart();
+
+            } catch (error) {
+                showResult('completeTestResult', `❌ Error en test completo: ${error.message}`, false);
+            }
+        }
+    </script>
+</body>
+</html>
